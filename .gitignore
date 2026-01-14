@@ -1,0 +1,36 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.sln.iml
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+
+# Visual Studio cache/options
+.vs/
+
+# NuGet
+*.nupkg
+*.snupkg
+
+# ReSharper
+.idea/
+*.sln.iml
+
+# Entity Framework
+*.edmx.sql
+
+# User-specific files
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Backup & temporary files
+*~
+*.tmp
