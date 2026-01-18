@@ -4,9 +4,107 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BethersaApp"
+        xmlns:vm="clr-namespace:BethersaApp.ViewModels"
+        xmlns:views="clr-namespace:BethersaApp.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Bethersa - Sistema de Gestión" Height="700" Width="1200"
+        WindowStartupLocation="CenterScreen">
+    
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+    
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:PedidosViewModel}">
+            <views:PedidosView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:FacturacionViewModel}">
+            <views:FacturacionView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ClientesViewModel}">
+            <views:ClientesView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProductosViewModel}">
+            <views:ProductosView/>
+        </DataTemplate>
+        
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,15"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                Padding="{TemplateBinding Padding}"
+                                BorderThickness="3,0,0,0"
+                                BorderBrush="Transparent"
+                                x:Name="border">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3d5a80"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#ee6c4d"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
     <Grid>
-
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Panel de navegación lateral -->
+        <Border Grid.Column="0" Background="#293241">
+            <DockPanel>
+                <!-- Logo/Título -->
+                <Border DockPanel.Dock="Top" Padding="20" Background="#1d242d">
+                    <StackPanel>
+                        <TextBlock Text="BETHERSA" FontSize="24" FontWeight="Bold" Foreground="#ee6c4d"/>
+                        <TextBlock Text="Sistema de Gestión" FontSize="12" Foreground="#98c1d9"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Menú de navegación -->
+                <StackPanel Margin="0,20,0,0">
+                    <Button Content="Pedidos" 
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding NavigateToPedidosCommand}"/>
+                    <Button Content="Facturacion" 
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding NavigateToFacturacionCommand}"/>
+                    <Button Content="Clientes" 
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding NavigateToClientesCommand}"/>
+                    <Button Content="Productos" 
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding NavigateToProductosCommand}"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+        
+        <!-- Contenido principal -->
+        <Border Grid.Column="1" Background="#f0f4f8">
+            <DockPanel>
+                <!-- Header -->
+                <Border DockPanel.Dock="Top" Background="White" Padding="20,15" 
+                        BorderBrush="#e0e0e0" BorderThickness="0,0,0,1">
+                    <TextBlock Text="{Binding CurrentSection}" FontSize="20" FontWeight="SemiBold" Foreground="#293241"/>
+                </Border>
+                
+                <!-- Vista actual -->
+                <ContentControl Content="{Binding CurrentView}" Margin="20"/>
+            </DockPanel>
+        </Border>
     </Grid>
 </Window>
