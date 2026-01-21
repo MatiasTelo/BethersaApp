@@ -20,6 +20,7 @@ public partial class ProductosViewModel : ViewModelBase
 {
     private readonly CsvImportService _csvService;
     private List<Producto> _todosLosProductos = [];
+    private List<Categoria> _todasLasCategorias = [];
 
     [ObservableProperty]
     private ObservableCollection<Producto> _productos = [];
@@ -35,9 +36,6 @@ public partial class ProductosViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _nombre = string.Empty;
-
-    [ObservableProperty]
-    private string _categoria = string.Empty;
 
     [ObservableProperty]
     private string _proveedor = string.Empty;
@@ -66,6 +64,28 @@ public partial class ProductosViewModel : ViewModelBase
     [ObservableProperty]
     private ObservableCollection<RankingProductoViewModel> _rankingPorCliente = [];
 
+    // Propiedades para Categorías
+    [ObservableProperty]
+    private ObservableCollection<Categoria> _categorias = [];
+
+    [ObservableProperty]
+    private Categoria? _categoriaSeleccionadaProducto;
+
+    [ObservableProperty]
+    private Categoria? _categoriaSeleccionada;
+
+    [ObservableProperty]
+    private string _nombreCategoria = string.Empty;
+
+    [ObservableProperty]
+    private decimal _descuentoCategoria;
+
+    [ObservableProperty]
+    private bool _modoEdicionCategoria;
+
+    [ObservableProperty]
+    private bool _esNuevaCategoria;
+
     private string _textoBusqueda = string.Empty;
     public string TextoBusqueda
     {
@@ -75,6 +95,19 @@ public partial class ProductosViewModel : ViewModelBase
             if (SetProperty(ref _textoBusqueda, value))
             {
                 FiltrarProductos();
+            }
+        }
+    }
+
+    private string _textoBusquedaCategoria = string.Empty;
+    public string TextoBusquedaCategoria
+    {
+        get => _textoBusquedaCategoria;
+        set
+        {
+            if (SetProperty(ref _textoBusquedaCategoria, value))
+            {
+                FiltrarCategorias();
             }
         }
     }
@@ -96,6 +129,22 @@ public partial class ProductosViewModel : ViewModelBase
         }
     }
 
+    private void FiltrarCategorias()
+    {
+        if (string.IsNullOrWhiteSpace(_textoBusquedaCategoria))
+        {
+            Categorias = new ObservableCollection<Categoria>(_todasLasCategorias);
+        }
+        else
+        {
+            var busqueda = _textoBusquedaCategoria.ToLower();
+            var filtradas = _todasLasCategorias
+                .Where(c => c.Nombre.ToLower().Contains(busqueda, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            Categorias = new ObservableCollection<Categoria>(filtradas);
+        }
+    }
+
     public ProductosViewModel()
     {
         _csvService = new CsvImportService();
@@ -108,11 +157,18 @@ public partial class ProductosViewModel : ViewModelBase
         context.Database.EnsureCreated();
 
         _todosLosProductos = context.Productos
+            .Include(p => p.Categoria)
             .Where(p => p.Activo)
             .OrderBy(p => p.Nombre)
             .ToList();
 
+        _todasLasCategorias = context.Categorias
+            .Where(c => c.Activo)
+            .OrderBy(c => c.Nombre)
+            .ToList();
+
         Productos = new ObservableCollection<Producto>(_todosLosProductos);
+        Categorias = new ObservableCollection<Categoria>(_todasLasCategorias);
         Clientes = new ObservableCollection<Cliente>(context.Clientes.Where(c => c.Activo).ToList());
 
         CargarRankingGeneral();
@@ -185,7 +241,7 @@ public partial class ProductosViewModel : ViewModelBase
 
         Codigo = ProductoSeleccionado.Codigo;
         Nombre = ProductoSeleccionado.Nombre;
-        Categoria = ProductoSeleccionado.Categoria;
+        CategoriaSeleccionadaProducto = Categorias.FirstOrDefault(c => c.Id == ProductoSeleccionado.CategoriaId);
         Proveedor = ProductoSeleccionado.Proveedor;
         Precio = ProductoSeleccionado.Precio;
 
@@ -218,7 +274,7 @@ public partial class ProductosViewModel : ViewModelBase
             {
                 Codigo = Codigo,
                 Nombre = Nombre,
-                Categoria = Categoria,
+                CategoriaId = CategoriaSeleccionadaProducto?.Id,
                 Proveedor = Proveedor,
                 Precio = Precio,
                 Stock = 0,
@@ -234,7 +290,7 @@ public partial class ProductosViewModel : ViewModelBase
             {
                 producto.Codigo = Codigo;
                 producto.Nombre = Nombre;
-                producto.Categoria = Categoria;
+                producto.CategoriaId = CategoriaSeleccionadaProducto?.Id;
                 producto.Proveedor = Proveedor;
                 producto.Precio = Precio;
             }
@@ -328,13 +384,16 @@ public partial class ProductosViewModel : ViewModelBase
             {
                 var existente = context.Productos.FirstOrDefault(p => p.Codigo == item.Codigo);
 
+                // Buscar categoría por nombre
+                var categoria = context.Categorias.FirstOrDefault(c => c.Nombre == item.Categoria);
+
                 if (existente == null)
                 {
                     context.Productos.Add(new Producto
                     {
                         Codigo = item.Codigo,
                         Nombre = item.Nombre,
-                        Categoria = item.Categoria,
+                        CategoriaId = categoria?.Id,
                         Proveedor = item.Proveedor,
                         Precio = item.Precio,
                         Stock = 0,
@@ -345,7 +404,7 @@ public partial class ProductosViewModel : ViewModelBase
                 else
                 {
                     existente.Nombre = item.Nombre;
-                    existente.Categoria = item.Categoria;
+                    existente.CategoriaId = categoria?.Id;
                     existente.Proveedor = item.Proveedor;
                     existente.Precio = item.Precio;
                     actualizados++;
@@ -370,11 +429,139 @@ public partial class ProductosViewModel : ViewModelBase
     {
         Codigo = string.Empty;
         Nombre = string.Empty;
-        Categoria = string.Empty;
+        CategoriaSeleccionadaProducto = null;
         Proveedor = string.Empty;
         Precio = 0;
         ModoEdicion = false;
         EsNuevo = false;
         ProductoSeleccionado = null;
+    }
+
+    // ==================== GESTIÓN DE CATEGORÍAS ====================
+
+    [RelayCommand]
+    private void NuevaCategoria()
+    {
+        LimpiarFormularioCategoria();
+        EsNuevaCategoria = true;
+        ModoEdicionCategoria = true;
+    }
+
+    [RelayCommand]
+    private void EditarCategoria()
+    {
+        if (CategoriaSeleccionada == null) return;
+
+        NombreCategoria = CategoriaSeleccionada.Nombre;
+        DescuentoCategoria = CategoriaSeleccionada.PorcentajeDescuento;
+
+        EsNuevaCategoria = false;
+        ModoEdicionCategoria = true;
+    }
+
+    [RelayCommand]
+    private void GuardarCategoria()
+    {
+        if (string.IsNullOrWhiteSpace(NombreCategoria))
+        {
+            System.Windows.MessageBox.Show("El nombre de la categoria es obligatorio.",
+                "Validacion", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        if (DescuentoCategoria < 0 || DescuentoCategoria > 100)
+        {
+            System.Windows.MessageBox.Show("El descuento debe estar entre 0 y 100.",
+                "Validacion", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        using var context = new AppDbContext();
+
+        if (EsNuevaCategoria)
+        {
+            if (context.Categorias.Any(c => c.Nombre == NombreCategoria))
+            {
+                System.Windows.MessageBox.Show("Ya existe una categoria con ese nombre.",
+                    "Validacion", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            var categoria = new Categoria
+            {
+                Nombre = NombreCategoria,
+                PorcentajeDescuento = DescuentoCategoria,
+                Activo = true
+            };
+
+            context.Categorias.Add(categoria);
+        }
+        else if (CategoriaSeleccionada != null)
+        {
+            var categoria = context.Categorias.Find(CategoriaSeleccionada.Id);
+            if (categoria != null)
+            {
+                categoria.Nombre = NombreCategoria;
+                categoria.PorcentajeDescuento = DescuentoCategoria;
+            }
+        }
+
+        context.SaveChanges();
+        CargarDatos();
+        LimpiarFormularioCategoria();
+    }
+
+    [RelayCommand]
+    private void EliminarCategoria()
+    {
+        if (CategoriaSeleccionada == null) return;
+
+        using var context = new AppDbContext();
+        
+        // Verificar si hay productos con esta categoría
+        var productosConCategoria = context.Productos.Count(p => p.CategoriaId == CategoriaSeleccionada.Id && p.Activo);
+        
+        if (productosConCategoria > 0)
+        {
+            System.Windows.MessageBox.Show(
+                $"No se puede eliminar la categoria porque hay {productosConCategoria} producto(s) asociado(s).",
+                "No se puede eliminar",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var result = System.Windows.MessageBox.Show(
+            $"Esta seguro de eliminar la categoria {CategoriaSeleccionada.Nombre}?",
+            "Confirmar eliminacion",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+
+        if (result == System.Windows.MessageBoxResult.Yes)
+        {
+            var categoria = context.Categorias.Find(CategoriaSeleccionada.Id);
+            if (categoria != null)
+            {
+                categoria.Activo = false;
+                context.SaveChanges();
+            }
+
+            CargarDatos();
+        }
+    }
+
+    [RelayCommand]
+    private void CancelarCategoria()
+    {
+        LimpiarFormularioCategoria();
+    }
+
+    private void LimpiarFormularioCategoria()
+    {
+        NombreCategoria = string.Empty;
+        DescuentoCategoria = 0;
+        ModoEdicionCategoria = false;
+        EsNuevaCategoria = false;
+        CategoriaSeleccionada = null;
     }
 }

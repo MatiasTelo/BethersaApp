@@ -6,7 +6,7 @@
          xmlns:local="clr-namespace:BethersaApp.Views"
          xmlns:converters="clr-namespace:BethersaApp.Converters"
          mc:Ignorable="d" 
-         d:DesignHeight="600" d:DesignWidth="900">
+         d:DesignHeight="700" d:DesignWidth="1000">
     
 <UserControl.Resources>
     <converters:BoolToVisibilityConverter x:Key="BoolToVis"/>
@@ -52,148 +52,339 @@
         <Setter Property="BorderBrush" Value="#ddd"/>
     </Style>
 </UserControl.Resources>
-    
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="400"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        
-        <!-- Lista de clientes -->
-        <Border Grid.Column="0" Background="White" CornerRadius="8" Margin="0,0,10,0" Padding="15">
-            <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="Lista de Clientes" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
-                
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
-                    <Button Content="+ Nuevo Cliente" Style="{StaticResource PrimaryButton}" 
-                            Command="{Binding NuevoClienteCommand}" Margin="0,0,5,0"/>
-                    <Button Content="Editar" Style="{StaticResource SecondaryButton}" 
-                            Command="{Binding EditarClienteCommand}" Margin="0,0,5,0"/>
-                    <Button Content="Eliminar" Style="{StaticResource DangerButton}" 
-                            Command="{Binding EliminarClienteCommand}"/>
-                </StackPanel>
-                
-                <!-- Buscador -->
-                <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
-                    <TextBox Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged}" 
-                             Padding="10,8" FontSize="13" BorderBrush="#ddd"/>
-                    <TextBlock Text="Buscar por codigo o nombre..." 
-                               IsHitTestVisible="False" Padding="12,10" Foreground="#999"
-                               Visibility="{Binding TextoBusqueda, Converter={StaticResource InverseBoolToVis}}"/>
-                </Grid>
-                
-                <DataGrid ItemsSource="{Binding Clientes}" 
-                          SelectedItem="{Binding ClienteSeleccionado}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          SelectionMode="Single"
-                          HeadersVisibility="Column"
-                          GridLinesVisibility="Horizontal"
-                          BorderThickness="1"
-                          BorderBrush="#e0e0e0">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Codigo" Binding="{Binding Codigo}" Width="80"/>
-                        <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="150"/>
-                        <DataGridTextColumn Header="CUIT" Binding="{Binding Cuit}" Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </DockPanel>
-        </Border>
-        
-        <!-- Formulario de edicion -->
-        <Border Grid.Column="1" Background="White" CornerRadius="8" Padding="20"
-                Visibility="{Binding ModoEdicion, Converter={StaticResource BoolToVis}}">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <TextBlock Text="Datos del Cliente" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,20"/>
+
+<TabControl>
+    <!-- Tab de Clientes -->
+    <TabItem Header="Clientes">
+        <Grid Margin="15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400" MinWidth="300"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*" MinWidth="400"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Lista de clientes -->
+            <Border Grid.Column="0" Background="White" CornerRadius="8" Margin="0,0,5,0" Padding="15">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Lista de Clientes" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
                     
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        
-                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
-                            <TextBlock Text="Codigo *" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding Codigo, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Row="0" Grid.Column="1">
-                            <TextBlock Text="Nombre *" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                            <TextBlock Text="Direccion" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding Direccion, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,0">
-                            <TextBlock Text="Localidad" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding Localidad, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Row="2" Grid.Column="1">
-                            <TextBlock Text="Provincia" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding Provincia, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,10,0">
-                            <TextBlock Text="Codigo Postal" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding CodigoPostal, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Row="3" Grid.Column="1">
-                            <TextBlock Text="Telefono" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,10,0">
-                            <TextBlock Text="Email" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Row="4" Grid.Column="1">
-                            <TextBlock Text="CUIT" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding Cuit, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
-                            <TextBlock Text="Tipo de IVA" Style="{StaticResource FormLabel}"/>
-                            <ComboBox ItemsSource="{Binding TiposIva}" 
-                                      SelectedItem="{Binding TipoIva}"
-                                      Padding="10,8" FontSize="13" Margin="0,0,0,10"/>
-                        </StackPanel>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="+ Nuevo" Style="{StaticResource PrimaryButton}" 
+                                Command="{Binding NuevoClienteCommand}" Margin="0,0,5,0"/>
+                        <Button Content="Editar" Style="{StaticResource SecondaryButton}" 
+                                Command="{Binding EditarClienteCommand}" Margin="0,0,5,0"/>
+                        <Button Content="Eliminar" Style="{StaticResource DangerButton}" 
+                                Command="{Binding EliminarClienteCommand}"/>
+                    </StackPanel>
+                    
+                    <!-- Buscador -->
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                        <TextBox Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged}" 
+                                 Padding="10,8" FontSize="13" BorderBrush="#ddd"/>
+                        <TextBlock Text="Buscar por codigo o nombre..." 
+                                   IsHitTestVisible="False" Padding="12,10" Foreground="#999"
+                                   Visibility="{Binding TextoBusqueda, Converter={StaticResource InverseBoolToVis}}"/>
                     </Grid>
                     
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                        <Button Content="Cancelar" Style="{StaticResource SecondaryButton}" 
-                                Command="{Binding CancelarCommand}" Margin="0,0,10,0"/>
-                        <Button Content="Guardar" Style="{StaticResource PrimaryButton}" 
-                                Command="{Binding GuardarClienteCommand}"/>
+                    <DataGrid ItemsSource="{Binding Clientes}" 
+                              SelectedItem="{Binding ClienteSeleccionado}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              BorderThickness="1"
+                              BorderBrush="#e0e0e0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Codigo" Binding="{Binding Codigo}" Width="70"/>
+                            <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="140"/>
+                            <DataGridTextColumn Header="Vendedor" Binding="{Binding Vendedor.Nombre}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+            
+            <!-- GridSplitter -->
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" 
+                          Background="#e0e0e0" Cursor="SizeWE"/>
+            
+            <!-- Panel derecho -->
+            <Border Grid.Column="2" Background="White" CornerRadius="8" Margin="5,0,0,0" Padding="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Formulario de edicion -->
+                        <Border Visibility="{Binding ModoEdicion, Converter={StaticResource BoolToVis}}">
+                            <StackPanel>
+                                <TextBlock Text="Datos del Cliente" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,15"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
+                                        <TextBlock Text="Codigo *" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding Codigo, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="0" Grid.Column="1">
+                                        <TextBlock Text="Nombre *" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                                        <TextBlock Text="Direccion" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding Direccion, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,0">
+                                        <TextBlock Text="Localidad" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding Localidad, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="2" Grid.Column="1">
+                                        <TextBlock Text="Provincia" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding Provincia, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,10,0">
+                                        <TextBlock Text="Codigo Postal" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding CodigoPostal, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="3" Grid.Column="1">
+                                        <TextBlock Text="Telefono" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,10,0">
+                                        <TextBlock Text="Email" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="4" Grid.Column="1">
+                                        <TextBlock Text="CUIT" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding Cuit, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,10,0">
+                                        <TextBlock Text="Tipo de IVA" Style="{StaticResource FormLabel}"/>
+                                        <ComboBox ItemsSource="{Binding TiposIva}" 
+                                                  SelectedItem="{Binding TipoIva}"
+                                                  Padding="10,8" FontSize="13" Margin="0,0,0,10"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="5" Grid.Column="1">
+                                        <TextBlock Text="Vendedor Asignado" Style="{StaticResource FormLabel}"/>
+                                        <ComboBox ItemsSource="{Binding Vendedores}" 
+                                                  SelectedItem="{Binding VendedorSeleccionadoCliente}"
+                                                  DisplayMemberPath="Nombre"
+                                                  Padding="10,8" FontSize="13" Margin="0,0,0,10"/>
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                    <Button Content="Cancelar" Style="{StaticResource SecondaryButton}" 
+                                            Command="{Binding CancelarCommand}" Margin="0,0,10,0"/>
+                                    <Button Content="Guardar" Style="{StaticResource PrimaryButton}" 
+                                            Command="{Binding GuardarClienteCommand}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Info cliente seleccionado -->
+                        <Border Visibility="{Binding ModoEdicion, Converter={StaticResource InverseBoolToVis}}"
+                                Background="#f8f9fa" CornerRadius="8" Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="Informacion del Cliente" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,15"/>
+                                
+                                <TextBlock Text="Cliente seleccionado:" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="{Binding ClienteSeleccionado.Nombre, FallbackValue='Ninguno'}" 
+                                           FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
+                                
+                                <TextBlock Text="Vendedor asignado:" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="{Binding ClienteSeleccionado.Vendedor.Nombre, FallbackValue='Sin vendedor asignado'}" 
+                                           FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                
+                                <TextBlock Text="CUIT:" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="{Binding ClienteSeleccionado.Cuit, FallbackValue='-'}" Margin="0,0,0,10"/>
+                                
+                                <TextBlock Text="Tipo IVA:" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="{Binding ClienteSeleccionado.TipoIva, FallbackValue='-'}"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
-                </StackPanel>
-            </ScrollViewer>
-        </Border>
-        
-        <!-- Mensaje cuando no hay edicion -->
-        <Border Grid.Column="1" Background="White" CornerRadius="8" Padding="20"
-                Visibility="{Binding ModoEdicion, Converter={StaticResource InverseBoolToVis}}">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="Clientes" FontSize="48" HorizontalAlignment="Center" Opacity="0.3"/>
-                <TextBlock Text="Seleccione un cliente para editar" FontSize="16" Foreground="#888" 
-                           HorizontalAlignment="Center" Margin="0,10,0,0"/>
-                <TextBlock Text="o cree uno nuevo" FontSize="14" Foreground="#aaa" 
-                           HorizontalAlignment="Center"/>
-            </StackPanel>
-        </Border>
-    </Grid>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </TabItem>
+    
+    <!-- Tab de Vendedores -->
+    <TabItem Header="Vendedores">
+        <Grid Margin="15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400" MinWidth="300"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*" MinWidth="350"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Lista de vendedores -->
+            <Border Grid.Column="0" Background="White" CornerRadius="8" Margin="0,0,5,0" Padding="15">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Lista de Vendedores" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
+                    
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="+ Nuevo" Style="{StaticResource PrimaryButton}" 
+                                Command="{Binding NuevoVendedorCommand}" Margin="0,0,5,0"/>
+                        <Button Content="Editar" Style="{StaticResource SecondaryButton}" 
+                                Command="{Binding EditarVendedorCommand}" Margin="0,0,5,0"/>
+                        <Button Content="Eliminar" Style="{StaticResource DangerButton}" 
+                                Command="{Binding EliminarVendedorCommand}"/>
+                    </StackPanel>
+                    
+                    <!-- Buscador -->
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                        <TextBox Text="{Binding TextoBusquedaVendedor, UpdateSourceTrigger=PropertyChanged}" 
+                                 Padding="10,8" FontSize="13" BorderBrush="#ddd"/>
+                        <TextBlock Text="Buscar vendedor..." 
+                                   IsHitTestVisible="False" Padding="12,10" Foreground="#999"
+                                   Visibility="{Binding TextoBusquedaVendedor, Converter={StaticResource InverseBoolToVis}}"/>
+                    </Grid>
+                    
+                    <DataGrid ItemsSource="{Binding Vendedores}" 
+                              SelectedItem="{Binding VendedorSeleccionado}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              BorderThickness="1"
+                              BorderBrush="#e0e0e0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Codigo" Binding="{Binding Codigo}" Width="80"/>
+                            <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="150"/>
+                            <DataGridTextColumn Header="Telefono" Binding="{Binding Telefono}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+            
+            <!-- GridSplitter -->
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" 
+                          Background="#e0e0e0" Cursor="SizeWE"/>
+            
+            <!-- Panel derecho -->
+            <Border Grid.Column="2" Background="White" CornerRadius="8" Margin="5,0,0,0" Padding="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Formulario de edicion de vendedor -->
+                        <Border Visibility="{Binding ModoEdicionVendedor, Converter={StaticResource BoolToVis}}">
+                            <StackPanel>
+                                <TextBlock Text="Datos del Vendedor" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,15"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
+                                        <TextBlock Text="Codigo *" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding CodigoVendedor, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="0" Grid.Column="1">
+                                        <TextBlock Text="Nombre *" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding NombreVendedor, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                                        <TextBlock Text="Direccion" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding DireccionVendedor, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,0">
+                                        <TextBlock Text="Localidad" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding LocalidadVendedor, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="2" Grid.Column="1">
+                                        <TextBlock Text="Provincia" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding ProvinciaVendedor, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,10,0">
+                                        <TextBlock Text="Codigo Postal" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding CodigoPostalVendedor, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="3" Grid.Column="1">
+                                        <TextBlock Text="Telefono" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding TelefonoVendedor, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                                        <TextBlock Text="CUIT" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding CuitVendedor, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                    <Button Content="Cancelar" Style="{StaticResource SecondaryButton}" 
+                                            Command="{Binding CancelarVendedorCommand}" Margin="0,0,10,0"/>
+                                    <Button Content="Guardar" Style="{StaticResource PrimaryButton}" 
+                                            Command="{Binding GuardarVendedorCommand}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Info vendedor seleccionado -->
+                        <Border Visibility="{Binding ModoEdicionVendedor, Converter={StaticResource InverseBoolToVis}}"
+                                Background="#f8f9fa" CornerRadius="8" Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="Informacion del Vendedor" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,15"/>
+                                
+                                <TextBlock Text="Vendedor seleccionado:" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="{Binding VendedorSeleccionado.Nombre, FallbackValue='Ninguno'}" 
+                                           FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
+                                
+                                <TextBlock Text="CUIT:" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="{Binding VendedorSeleccionado.Cuit, FallbackValue='-'}" Margin="0,0,0,10"/>
+                                
+                                <TextBlock Text="Telefono:" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="{Binding VendedorSeleccionado.Telefono, FallbackValue='-'}" Margin="0,0,0,10"/>
+                                
+                                <TextBlock Text="Direccion:" FontSize="12" Foreground="#666"/>
+                                <TextBlock TextWrapping="Wrap">
+                                    <Run Text="{Binding VendedorSeleccionado.Direccion, FallbackValue=''}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding VendedorSeleccionado.Localidad, FallbackValue=''}"/>
+                                    <Run Text=", "/>
+                                    <Run Text="{Binding VendedorSeleccionado.Provincia, FallbackValue=''}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </TabItem>
+</TabControl>
 </UserControl>

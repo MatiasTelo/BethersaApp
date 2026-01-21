@@ -7,7 +7,9 @@ namespace BethersaApp.Data;
 public class AppDbContext : DbContext
 {
     public DbSet<Cliente> Clientes { get; set; }
+    public DbSet<Vendedor> Vendedores { get; set; }
     public DbSet<Producto> Productos { get; set; }
+    public DbSet<Categoria> Categorias { get; set; }
     public DbSet<Pedido> Pedidos { get; set; }
     public DbSet<DetallePedido> DetallesPedido { get; set; }
     public DbSet<MovimientoStock> MovimientosStock { get; set; }
@@ -20,11 +22,30 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Vendedor>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Codigo).IsUnique();
+            entity.Property(e => e.Nombre).IsRequired().HasMaxLength(200);
+        });
+
         modelBuilder.Entity<Cliente>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.Codigo).IsUnique();
             entity.Property(e => e.Nombre).IsRequired().HasMaxLength(200);
+            entity.HasOne(e => e.Vendedor)
+                  .WithMany(v => v.Clientes)
+                  .HasForeignKey(e => e.VendedorId)
+                  .IsRequired(false);
+        });
+
+        modelBuilder.Entity<Categoria>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Nombre).IsUnique();
+            entity.Property(e => e.Nombre).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.PorcentajeDescuento).HasPrecision(5, 2);
         });
 
         modelBuilder.Entity<Producto>(entity =>
@@ -32,6 +53,10 @@ public class AppDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.Codigo).IsUnique();
             entity.Property(e => e.Nombre).IsRequired().HasMaxLength(500);
+            entity.HasOne(e => e.Categoria)
+                  .WithMany(c => c.Productos)
+                  .HasForeignKey(e => e.CategoriaId)
+                  .IsRequired(false);
         });
 
         modelBuilder.Entity<Pedido>(entity =>

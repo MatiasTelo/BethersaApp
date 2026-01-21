@@ -109,7 +109,7 @@
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Codigo" Binding="{Binding Codigo}" Width="100"/>
                                 <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="180"/>
-                                <DataGridTextColumn Header="Categoria" Binding="{Binding Categoria}" Width="100"/>
+                                <DataGridTextColumn Header="Categoria" Binding="{Binding Categoria.Nombre}" Width="120"/>
                                 <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="60"/>
                                 <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C2}" Width="*"/>
                             </DataGrid.Columns>
@@ -138,7 +138,10 @@
                                     <TextBox Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
                                     
                                     <TextBlock Text="Categoria" Style="{StaticResource FormLabel}"/>
-                                    <TextBox Text="{Binding Categoria, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    <ComboBox ItemsSource="{Binding Categorias}" 
+                                              SelectedItem="{Binding CategoriaSeleccionadaProducto}"
+                                              DisplayMemberPath="Nombre"
+                                              Padding="10,8" FontSize="13" Margin="0,0,0,10"/>
                                     
                                     <TextBlock Text="Proveedor" Style="{StaticResource FormLabel}"/>
                                     <TextBox Text="{Binding Proveedor, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
@@ -263,6 +266,118 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </DockPanel>
+                </Border>
+            </Grid>
+        </TabItem>
+        
+        <!-- Tab de Categorias -->
+        <TabItem Header="Categorias">
+            <Grid Margin="15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" MinWidth="400"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="350" MinWidth="300"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Lista de Categorias -->
+                <Border Grid.Column="0" Background="White" CornerRadius="8" Margin="0,0,5,0" Padding="15">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Lista de Categorias" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
+                        
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button Content="+ Nueva" Style="{StaticResource PrimaryButton}" 
+                                    Command="{Binding NuevaCategoriaCommand}" Margin="0,0,5,0"/>
+                            <Button Content="Editar" Style="{StaticResource SecondaryButton}" 
+                                    Command="{Binding EditarCategoriaCommand}" Margin="0,0,5,0"/>
+                            <Button Content="Eliminar" Style="{StaticResource DangerButton}" 
+                                    Command="{Binding EliminarCategoriaCommand}"/>
+                        </StackPanel>
+                        
+                        <!-- Buscador -->
+                        <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                            <TextBox Text="{Binding TextoBusquedaCategoria, UpdateSourceTrigger=PropertyChanged}" 
+                                     Padding="10,8" FontSize="13" BorderBrush="#ddd"/>
+                            <TextBlock Text="Buscar categoria..." 
+                                       IsHitTestVisible="False" Padding="12,10" Foreground="#999"
+                                       Visibility="{Binding TextoBusquedaCategoria, Converter={StaticResource InverseBoolToVis}}"/>
+                        </Grid>
+                        
+                        <DataGrid ItemsSource="{Binding Categorias}" 
+                                  SelectedItem="{Binding CategoriaSeleccionada}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  BorderThickness="1"
+                                  BorderBrush="#e0e0e0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
+                                <DataGridTextColumn Header="Descuento %" Binding="{Binding PorcentajeDescuento, StringFormat=N2}" Width="120"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </Border>
+                
+                <!-- GridSplitter -->
+                <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" 
+                              Background="#e0e0e0" Cursor="SizeWE"/>
+                
+                <!-- Panel de edicion de Categoria -->
+                <Border Grid.Column="2" Background="White" CornerRadius="8" Margin="5,0,0,0" Padding="20">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <!-- Formulario de edicion de categoria -->
+                            <Border Visibility="{Binding ModoEdicionCategoria, Converter={StaticResource BoolToVis}}" 
+                                    Margin="0,0,0,20">
+                                <StackPanel>
+                                    <TextBlock Text="Datos de la Categoria" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,15"/>
+                                    
+                                    <TextBlock Text="Nombre *" Style="{StaticResource FormLabel}"/>
+                                    <TextBox Text="{Binding NombreCategoria, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    
+                                    <TextBlock Text="Porcentaje de Descuento (%)" Style="{StaticResource FormLabel}"/>
+                                    <TextBox Text="{Binding DescuentoCategoria, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}"/>
+                                    
+                                    <TextBlock Text="El descuento se aplicara al momento de facturar" 
+                                               FontSize="11" Foreground="#888" Margin="0,0,0,15"/>
+                                    
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                        <Button Content="Cancelar" Style="{StaticResource SecondaryButton}" 
+                                                Command="{Binding CancelarCategoriaCommand}" Margin="0,0,10,0"/>
+                                        <Button Content="Guardar" Style="{StaticResource PrimaryButton}" 
+                                                Command="{Binding GuardarCategoriaCommand}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Info de categoria seleccionada -->
+                            <Border Background="#f8f9fa" CornerRadius="8" Padding="15"
+                                    Visibility="{Binding ModoEdicionCategoria, Converter={StaticResource BoolToVis}, ConverterParameter=inverse}">
+                                <StackPanel>
+                                    <TextBlock Text="Informacion de Categoria" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,15"/>
+                                    
+                                    <TextBlock Text="Categoria seleccionada:" FontSize="12" Foreground="#666"/>
+                                    <TextBlock Text="{Binding CategoriaSeleccionada.Nombre, FallbackValue='Ninguna'}" 
+                                               FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                    
+                                    <TextBlock Text="Descuento aplicado:" FontSize="12" Foreground="#666"/>
+                                    <TextBlock FontWeight="SemiBold" Margin="0,0,0,15">
+                                        <Run Text="{Binding CategoriaSeleccionada.PorcentajeDescuento, FallbackValue='0', StringFormat=N2}"/>
+                                        <Run Text="%"/>
+                                    </TextBlock>
+                                    
+                                    <Border Background="#e3f2fd" CornerRadius="5" Padding="10" Margin="0,10,0,0">
+                                        <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#1565c0">
+                                            <Run FontWeight="Bold">Nota:</Run>
+                                            <LineBreak/>
+                                            El descuento de la categoria se aplica automaticamente al generar la factura (no en el remito).
+                                        </TextBlock>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
                 </Border>
             </Grid>
         </TabItem>

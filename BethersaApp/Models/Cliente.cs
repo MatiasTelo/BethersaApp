@@ -15,5 +15,9 @@ public class Cliente
     public string Cuit { get; set; } = string.Empty;
     public bool Activo { get; set; } = true;
 
+    // Relacion con Vendedor
+    public int? VendedorId { get; set; }
+    public Vendedor? Vendedor { get; set; }
+
     public ICollection<Pedido> Pedidos { get; set; } = [];
 }

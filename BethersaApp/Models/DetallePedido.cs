@@ -24,4 +24,10 @@ public class DetallePedido
     public EstadoProducto Estado { get; set; } = EstadoProducto.NoLlego;
     public bool UsaStock { get; set; }
     public int CantidadDeStock { get; set; }
+    
+    // Campos para facturación
+    public decimal PrecioUnitario { get; set; }
+    public decimal PorcentajeDescuento { get; set; }
+    public decimal PrecioConDescuento { get; set; }
+    public decimal Subtotal { get; set; }
 }

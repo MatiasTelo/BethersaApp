@@ -71,34 +71,58 @@ public partial class FacturacionViewModel : ViewModelBase
         if (PedidoSeleccionado == null)
         {
             System.Windows.MessageBox.Show("Debe seleccionar un pedido.",
-                "Validación", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                "Validacion", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
             return;
         }
 
         using var context = new AppDbContext();
         var pedido = context.Pedidos
+            .Include(p => p.Cliente)
+                .ThenInclude(c => c.Vendedor)
             .Include(p => p.Detalles)
             .FirstOrDefault(p => p.Id == PedidoSeleccionado.Id);
 
         if (pedido == null) return;
 
-        // Descontar stock para los productos que usan stock
-        foreach (var detalle in pedido.Detalles.Where(d => d.UsaStock && d.CantidadDeStock > 0))
+        decimal totalSinDescuento = 0;
+        decimal totalConDescuento = 0;
+
+        // Procesar cada detalle y aplicar descuentos por categoria
+        foreach (var detalle in pedido.Detalles)
         {
-            var producto = context.Productos.FirstOrDefault(p => p.Codigo == detalle.CodigoProducto);
+            // Buscar el producto y su categoria
+            var producto = context.Productos
+                .Include(p => p.Categoria)
+                .FirstOrDefault(p => p.Codigo == detalle.CodigoProducto);
+
             if (producto != null)
             {
-                producto.Stock -= detalle.CantidadDeStock;
+                detalle.PrecioUnitario = producto.Precio;
+                detalle.PorcentajeDescuento = producto.Categoria?.PorcentajeDescuento ?? 0;
+                
+                // Calcular precio con descuento
+                var descuento = detalle.PrecioUnitario * (detalle.PorcentajeDescuento / 100);
+                detalle.PrecioConDescuento = detalle.PrecioUnitario - descuento;
+                detalle.Subtotal = detalle.PrecioConDescuento * detalle.CantidadRecibida;
 
-                context.MovimientosStock.Add(new MovimientoStock
+                totalSinDescuento += detalle.PrecioUnitario * detalle.CantidadRecibida;
+                totalConDescuento += detalle.Subtotal;
+
+                // Descontar stock si corresponde
+                if (detalle.UsaStock && detalle.CantidadDeStock > 0)
                 {
-                    ProductoId = producto.Id,
-                    Cantidad = detalle.CantidadDeStock,
-                    TipoMovimiento = "Salida",
-                    Motivo = $"Facturación pedido {pedido.Codigo}",
-                    Fecha = DateTime.Now,
-                    PedidoId = pedido.Id
-                });
+                    producto.Stock -= detalle.CantidadDeStock;
+
+                    context.MovimientosStock.Add(new MovimientoStock
+                    {
+                        ProductoId = producto.Id,
+                        Cantidad = detalle.CantidadDeStock,
+                        TipoMovimiento = "Salida",
+                        Motivo = $"Facturacion pedido {pedido.Codigo}",
+                        Fecha = DateTime.Now,
+                        PedidoId = pedido.Id
+                    });
+                }
             }
         }
 
@@ -106,7 +130,16 @@ public partial class FacturacionViewModel : ViewModelBase
         pedido.FechaFactura = DateTime.Now;
         context.SaveChanges();
 
-        System.Windows.MessageBox.Show($"Factura generada para el pedido {pedido.Codigo}",
+        var ahorroTotal = totalSinDescuento - totalConDescuento;
+        var vendedorNombre = pedido.Cliente?.Vendedor?.Nombre ?? "Sin vendedor asignado";
+        
+        System.Windows.MessageBox.Show(
+            $"Factura generada para el pedido {pedido.Codigo}\n\n" +
+            $"Cliente: {pedido.Cliente?.Nombre}\n" +
+            $"Vendedor: {vendedorNombre}\n\n" +
+            $"Subtotal sin descuento: ${totalSinDescuento:N2}\n" +
+            $"Descuentos aplicados: -${ahorroTotal:N2}\n" +
+            $"Total con descuento: ${totalConDescuento:N2}",
             "Factura Generada", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
 
         CargarPedidosRemitados();
