@@ -16,6 +16,10 @@ public class Pedido
     public DateTime? FechaFactura { get; set; }
     public EstadoPedido Estado { get; set; } = EstadoPedido.Pendiente;
     
+    // Datos de facturacion
+    public string? NumeroFactura { get; set; }
+    public string? TipoFactura { get; set; } // "A" o "X"
+    
     public int ClienteId { get; set; }
     public Cliente Cliente { get; set; } = null!;
 
