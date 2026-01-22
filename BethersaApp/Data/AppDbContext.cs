@@ -8,11 +8,13 @@ public class AppDbContext : DbContext
 {
     public DbSet<Cliente> Clientes { get; set; }
     public DbSet<Vendedor> Vendedores { get; set; }
+    public DbSet<Proveedor> Proveedores { get; set; }
     public DbSet<Producto> Productos { get; set; }
     public DbSet<Categoria> Categorias { get; set; }
     public DbSet<Pedido> Pedidos { get; set; }
     public DbSet<DetallePedido> DetallesPedido { get; set; }
     public DbSet<MovimientoStock> MovimientosStock { get; set; }
+    public DbSet<MovimientoCuentaCorriente> MovimientosCuentaCorriente { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -23,6 +25,13 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Vendedor>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Codigo).IsUnique();
+            entity.Property(e => e.Nombre).IsRequired().HasMaxLength(200);
+        });
+
+        modelBuilder.Entity<Proveedor>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.Codigo).IsUnique();
@@ -86,6 +95,26 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.Producto)
                   .WithMany()
                   .HasForeignKey(e => e.ProductoId);
+            entity.HasOne(e => e.Pedido)
+                  .WithMany()
+                  .HasForeignKey(e => e.PedidoId)
+                  .IsRequired(false);
+        });
+
+        modelBuilder.Entity<MovimientoCuentaCorriente>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Debe).HasPrecision(18, 2);
+            entity.Property(e => e.Haber).HasPrecision(18, 2);
+            entity.Property(e => e.Saldo).HasPrecision(18, 2);
+            entity.HasOne(e => e.Cliente)
+                  .WithMany(c => c.MovimientosCuenta)
+                  .HasForeignKey(e => e.ClienteId)
+                  .IsRequired(false);
+            entity.HasOne(e => e.Proveedor)
+                  .WithMany(p => p.Movimientos)
+                  .HasForeignKey(e => e.ProveedorId)
+                  .IsRequired(false);
             entity.HasOne(e => e.Pedido)
                   .WithMany()
                   .HasForeignKey(e => e.PedidoId)

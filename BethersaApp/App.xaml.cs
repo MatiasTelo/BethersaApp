@@ -152,10 +152,22 @@ public partial class App : Application
                 new() { Nombre = "VARIOS", PorcentajeDescuento = 33.5m },
                 new() { Nombre = "PISTON SERVOFRENO", PorcentajeDescuento = 33.5m },
                 
-                // Categoría sin descuento para productos sin categoría asignada
+                // Categoria sin descuento para productos sin categoria asignada
                 new() { Nombre = "Sin Categoria", PorcentajeDescuento = 0.00m }
             };
             context.Categorias.AddRange(categorias);
+        }
+
+        // Agregar proveedores de prueba si no existen
+        if (!context.Proveedores.Any())
+        {
+            var proveedores = new List<Proveedor>
+            {
+                new() { Codigo = "PRV001", Nombre = "CORVEN S.A.", Direccion = "Av. Industrial 1234", Localidad = "Buenos Aires", Provincia = "Buenos Aires", CodigoPostal = "1416", Telefono = "011-4555-6666", Email = "ventas@corven.com", Cuit = "30-55555555-5", Activo = true },
+                new() { Codigo = "PRV002", Nombre = "SADAR Repuestos", Direccion = "Ruta 9 Km 50", Localidad = "Rosario", Provincia = "Santa Fe", CodigoPostal = "2000", Telefono = "0341-4777888", Email = "compras@sadar.com.ar", Cuit = "30-66666666-6", Activo = true },
+                new() { Codigo = "PRV003", Nombre = "FTE Argentina", Direccion = "Parque Industrial 456", Localidad = "Cordoba", Provincia = "Cordoba", CodigoPostal = "5000", Telefono = "0351-4999000", Email = "info@fte.com.ar", Cuit = "30-77777777-7", Activo = true }
+            };
+            context.Proveedores.AddRange(proveedores);
         }
 
         context.SaveChanges();

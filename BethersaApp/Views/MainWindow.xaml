@@ -27,6 +27,9 @@
         <DataTemplate DataType="{x:Type vm:ProductosViewModel}">
             <views:ProductosView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CuentaCorrienteViewModel}">
+            <views:CuentaCorrienteView/>
+        </DataTemplate>
         
         <Style x:Key="NavButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
@@ -89,6 +92,9 @@
                     <Button Content="Productos" 
                             Style="{StaticResource NavButtonStyle}"
                             Command="{Binding NavigateToProductosCommand}"/>
+                    <Button Content="Cuenta Corriente" 
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding NavigateToCuentaCorrienteCommand}"/>
                 </StackPanel>
             </DockPanel>
         </Border>

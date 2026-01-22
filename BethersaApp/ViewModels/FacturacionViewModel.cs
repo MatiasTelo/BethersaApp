@@ -128,6 +128,36 @@ public partial class FacturacionViewModel : ViewModelBase
 
         pedido.Estado = EstadoPedido.Facturado;
         pedido.FechaFactura = DateTime.Now;
+
+        // Registrar movimiento en cuenta corriente del cliente
+        if (pedido.ClienteId > 0 && totalConDescuento > 0)
+        {
+            // Obtener saldo anterior del cliente
+            var ultimoMovimiento = context.MovimientosCuentaCorriente
+                .Where(m => m.ClienteId == pedido.ClienteId)
+                .OrderByDescending(m => m.Id)
+                .FirstOrDefault();
+
+            var saldoAnterior = ultimoMovimiento?.Saldo ?? 0;
+            var nuevoSaldo = saldoAnterior + totalConDescuento;
+
+            var movimientoCuenta = new MovimientoCuentaCorriente
+            {
+                TipoCuenta = TipoCuenta.Cliente,
+                ClienteId = pedido.ClienteId,
+                PedidoId = pedido.Id,
+                Fecha = DateTime.Now,
+                TipoMovimiento = TipoMovimientoCuenta.Factura,
+                Descripcion = $"Factura pedido {pedido.Codigo}",
+                NumeroComprobante = pedido.Codigo,
+                Debe = totalConDescuento,
+                Haber = 0,
+                Saldo = nuevoSaldo
+            };
+
+            context.MovimientosCuentaCorriente.Add(movimientoCuenta);
+        }
+
         context.SaveChanges();
 
         var ahorroTotal = totalSinDescuento - totalConDescuento;
@@ -139,7 +169,8 @@ public partial class FacturacionViewModel : ViewModelBase
             $"Vendedor: {vendedorNombre}\n\n" +
             $"Subtotal sin descuento: ${totalSinDescuento:N2}\n" +
             $"Descuentos aplicados: -${ahorroTotal:N2}\n" +
-            $"Total con descuento: ${totalConDescuento:N2}",
+            $"Total con descuento: ${totalConDescuento:N2}\n\n" +
+            $"Se registro en cuenta corriente del cliente.",
             "Factura Generada", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
 
         CargarPedidosRemitados();

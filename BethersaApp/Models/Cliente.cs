@@ -20,4 +20,5 @@ public class Cliente
     public Vendedor? Vendedor { get; set; }
 
     public ICollection<Pedido> Pedidos { get; set; } = [];
+    public ICollection<MovimientoCuentaCorriente> MovimientosCuenta { get; set; } = [];
 }

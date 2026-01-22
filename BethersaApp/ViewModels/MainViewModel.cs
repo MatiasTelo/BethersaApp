@@ -15,6 +15,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly FacturacionViewModel _facturacionViewModel;
     private readonly ClientesViewModel _clientesViewModel;
     private readonly ProductosViewModel _productosViewModel;
+    private readonly CuentaCorrienteViewModel _cuentaCorrienteViewModel;
 
     public MainViewModel()
     {
@@ -22,6 +23,7 @@ public partial class MainViewModel : ViewModelBase
         _facturacionViewModel = new FacturacionViewModel();
         _clientesViewModel = new ClientesViewModel();
         _productosViewModel = new ProductosViewModel();
+        _cuentaCorrienteViewModel = new CuentaCorrienteViewModel();
 
         CurrentView = _pedidosViewModel;
     }
@@ -52,5 +54,12 @@ public partial class MainViewModel : ViewModelBase
     {
         CurrentSection = "Productos";
         CurrentView = _productosViewModel;
+    }
+
+    [RelayCommand]
+    private void NavigateToCuentaCorriente()
+    {
+        CurrentSection = "Cuenta Corriente";
+        CurrentView = _cuentaCorrienteViewModel;
     }
 }
